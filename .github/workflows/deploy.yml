@@ -22,7 +22,7 @@ jobs:
           channel: stable
           flutter-version: 3.41.6
       - run: flutter pub get
-      - run: flutter build web --release --base-href "/AllWays-Slide-Site/"
+      - run: flutter build web --release --base-href "/AllWays-Slide-Site/" --pwa-strategy=none --no-wasm-dry-run
       - name: Publish to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
