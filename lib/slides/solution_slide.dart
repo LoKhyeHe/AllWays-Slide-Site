@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
-import '../widgets/editable_image.dart';
 
 class SolutionSlide extends StatelessWidget {
   const SolutionSlide({super.key});
@@ -13,7 +12,6 @@ class SolutionSlide extends StatelessWidget {
       label: 'PICK UP',
       title: 'Accessible Collection Point',
       detail: 'Accessible placement of collection point allows visually impaired users to locate and pick up the device independently upon entry.',
-      imageKey: 'solution_pickup',
       imagePath: 'lib/images/solution_pickup.jpg',
     ),
     _Step(
@@ -21,7 +19,6 @@ class SolutionSlide extends StatelessWidget {
       label: 'SELECT DESTINATION',
       title: 'Intuitive Mobile App',
       detail: 'A low-cognitive-load interface tested and validated with visually impaired users — simple, large targets, no clutter.',
-      imageKey: 'solution_app',
       imagePath: 'lib/images/solution_app.jpg',
     ),
     _Step(
@@ -29,7 +26,6 @@ class SolutionSlide extends StatelessWidget {
       label: 'NAVIGATE',
       title: 'Live UWB Navigation',
       detail: 'Real-time positioning from UWB anchors and map data drives the haptic belt — guiding every step without visual cues.',
-      imageKey: 'solution_navigate',
       imagePath: 'lib/images/solution_navigate.jpg',
     ),
   ];
@@ -91,12 +87,14 @@ class SolutionSlide extends StatelessWidget {
   }
 
   Widget _image(_Step s) {
-    return EditableImage(
-      configKey: s.imageKey,
-      assetPath: s.imagePath,
-      fit: BoxFit.cover,
-      width: double.infinity, // fill full column width
+    return ClipRRect(
       borderRadius: BorderRadius.circular(10),
+      child: Image.asset(
+        s.imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 340,
+      ),
     );
   }
 
@@ -189,14 +187,12 @@ class _Step {
   final String label;
   final String title;
   final String detail;
-  final String imageKey;
   final String imagePath;
   const _Step({
     required this.number,
     required this.label,
     required this.title,
     required this.detail,
-    required this.imageKey,
     required this.imagePath,
   });
 }

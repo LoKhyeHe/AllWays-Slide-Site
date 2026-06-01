@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
-import '../widgets/editable_image.dart';
 
 class PrototypeSlide extends StatelessWidget {
   const PrototypeSlide({super.key});
@@ -49,12 +48,13 @@ class PrototypeSlide extends StatelessWidget {
                       children: [
                         AspectRatio(
                           aspectRatio: 9 / 19.5,
-                          child: EditableImage(
-                            configKey: 'prototype_app_ui',
-                            assetPath: 'lib/images/app_ui.jpeg',
-                            fit: BoxFit.cover,
-                            expand: true,
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
+                            child: Image.asset(
+                              'lib/images/app_ui.jpeg',
+                              fit: BoxFit.cover,
+                              alignment: Alignment(0, -1),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -110,23 +110,29 @@ class PrototypeSlide extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       flex: 3,
-                                      child: EditableImage(
-                                        configKey: 'prototype_testing',
-                                        assetPath: 'lib/images/techable_testing.jpeg',
-                                        fit: BoxFit.cover,
-                                        expand: true,
+                                      child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: Image.asset(
+                                            'lib/images/techable_testing.jpeg',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       flex: 2,
-                                      child: EditableImage(
-                                        configKey: 'prototype_belt',
-                                        assetPath: 'lib/images/belt_testing.jpeg',
-                                        fit: BoxFit.cover,
-                                        expand: true,
+                                      child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: Image.asset(
+                                            'lib/images/belt_testing.jpeg',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],

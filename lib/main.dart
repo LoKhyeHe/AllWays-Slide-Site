@@ -13,11 +13,8 @@ import 'slides/insights_slide.dart';
 import 'slides/impact_slide.dart';
 import 'slides/team_slide.dart';
 import 'services/export_service.dart';
-import 'services/image_config_service.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await ImageConfigService.instance.load();
+void main() {
   runApp(const PitchDeckApp());
 }
 
@@ -48,7 +45,6 @@ class PitchDeckHome extends StatefulWidget {
 class _PitchDeckHomeState extends State<PitchDeckHome> {
   int _currentSlide = 0;
   bool _isExporting = false;
-  bool _isEditMode = false;
 
   late final List<SlideModel> _slides;
   late final List<GlobalKey> _slideKeys;
@@ -57,7 +53,6 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   @override
   void initState() {
     super.initState();
-    ImageConfigService.instance.editMode.addListener(_onEditModeChanged);
     _slides = [
       SlideModel(id: 'cover', label: 'Cover', builder: (_) => const CoverSlide()),
       SlideModel(id: 'problem', label: 'Problem', builder: (_) => const ProblemSlide()),
@@ -73,17 +68,8 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
 
   @override
   void dispose() {
-    ImageConfigService.instance.editMode.removeListener(_onEditModeChanged);
     _focusNode.dispose();
     super.dispose();
-  }
-
-  void _onEditModeChanged() {
-    setState(() => _isEditMode = ImageConfigService.instance.editMode.value);
-  }
-
-  void _toggleEditMode() {
-    ImageConfigService.instance.editMode.value = !_isEditMode;
   }
 
   void _goTo(int index) {
@@ -164,12 +150,9 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
                 totalSlides: _slides.length,
                 slideLabel: _slides[_currentSlide].label,
                 isExporting: _isExporting,
-                isEditMode: _isEditMode,
                 onPrev: () => _goTo(_currentSlide - 1),
                 onNext: () => _goTo(_currentSlide + 1),
                 onExport: _exportPdf,
-                onToggleEdit: _toggleEditMode,
-                onSaveConfig: ImageConfigService.instance.downloadConfig,
               ),
             ),
 
@@ -227,24 +210,18 @@ class _Toolbar extends StatelessWidget {
   final int totalSlides;
   final String slideLabel;
   final bool isExporting;
-  final bool isEditMode;
   final VoidCallback onPrev;
   final VoidCallback onNext;
   final VoidCallback onExport;
-  final VoidCallback onToggleEdit;
-  final VoidCallback onSaveConfig;
 
   const _Toolbar({
     required this.currentSlide,
     required this.totalSlides,
     required this.slideLabel,
     required this.isExporting,
-    required this.isEditMode,
     required this.onPrev,
     required this.onNext,
     required this.onExport,
-    required this.onToggleEdit,
-    required this.onSaveConfig,
   });
 
   @override
@@ -274,34 +251,6 @@ class _Toolbar extends StatelessWidget {
           const SizedBox(width: 4),
           _navBtn(Icons.arrow_forward_ios, onNext, currentSlide == totalSlides - 1),
           const SizedBox(width: 12),
-          // Edit-mode toggle
-          TextButton.icon(
-            onPressed: onToggleEdit,
-            icon: Icon(
-              isEditMode ? Icons.check_circle_outline : Icons.tune,
-              size: 15,
-              color: isEditMode ? const Color(0xFFF5C842) : Colors.white54,
-            ),
-            label: Text(
-              isEditMode ? 'Done Editing' : 'Edit Images',
-              style: TextStyle(
-                color: isEditMode ? const Color(0xFFF5C842) : Colors.white54,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          if (isEditMode) ...[
-            const SizedBox(width: 4),
-            TextButton.icon(
-              onPressed: onSaveConfig,
-              icon: const Icon(Icons.download, size: 15, color: Colors.white70),
-              label: const Text(
-                'Save JSON',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ),
-          ],
-          const SizedBox(width: 4),
           TextButton.icon(
             onPressed: isExporting ? null : onExport,
             icon: const Icon(Icons.picture_as_pdf, size: 16, color: Color(0xFFF5C842)),

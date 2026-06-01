@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
-import '../widgets/editable_image.dart';
 
 class WhyNowSlide extends StatelessWidget {
   const WhyNowSlide({super.key});
@@ -66,12 +65,14 @@ class WhyNowSlide extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          EditableImage(
-                            configKey: 'why_now_bus',
-                            assetPath: 'lib/images/KwekBin Bus.jpg',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
+                          ClipRRect(
                             borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              'lib/images/KwekBin Bus.jpg',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 290,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           const Text(

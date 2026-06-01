@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
-import '../widgets/editable_image.dart';
 
 class ProblemSlide extends StatelessWidget {
   const ProblemSlide({super.key});
@@ -41,12 +40,15 @@ class ProblemSlide extends StatelessWidget {
                             ),
                             const SizedBox(height: 14),
                             Expanded(
-                              child: EditableImage(
-                                configKey: 'problem_photo',
-                                assetPath: 'lib/images/school_visit.jpeg',
-                                fit: BoxFit.cover,
-                                expand: true,
+                              child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Image.asset(
+                                    'lib/images/school_visit.jpeg',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
