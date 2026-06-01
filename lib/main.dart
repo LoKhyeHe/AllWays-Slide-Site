@@ -1,9 +1,8 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'models/slide_model.dart';
-import 'widgets/dot_navigation.dart';
+import 'widgets/reveal.dart';
 import 'slides/cover_slide.dart';
 import 'slides/problem_slide.dart';
 import 'slides/why_now_slide.dart';
@@ -12,6 +11,7 @@ import 'slides/prototype_slide.dart';
 import 'slides/insights_slide.dart';
 import 'slides/impact_slide.dart';
 import 'slides/team_slide.dart';
+import 'slides/contact_slide.dart';
 import 'services/export_service.dart';
 
 void main() {
@@ -48,13 +48,17 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
 
   late final List<SlideModel> _slides;
   late final List<GlobalKey> _slideKeys;
+  final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+
+  double _unitExtent = 1;
+  final Set<int> _revealed = {0};
 
   @override
   void initState() {
     super.initState();
     _slides = [
-      SlideModel(id: 'cover', label: 'Cover', builder: (_) => const CoverSlide()),
+      SlideModel(id: 'cover', label: 'Home', builder: (_) => const CoverSlide()),
       SlideModel(id: 'problem', label: 'Problem', builder: (_) => const ProblemSlide()),
       SlideModel(id: 'why_now', label: 'Why Now', builder: (_) => const WhyNowSlide()),
       SlideModel(id: 'solution', label: 'Solution', builder: (_) => const SolutionSlide()),
@@ -62,18 +66,39 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
       SlideModel(id: 'insights', label: 'Insights', builder: (_) => const InsightsSlide()),
       SlideModel(id: 'impact', label: 'Impact', builder: (_) => const ImpactSlide()),
       SlideModel(id: 'team', label: 'Team', builder: (_) => const TeamSlide()),
+      SlideModel(id: 'contact', label: 'Contact', builder: (_) => const ContactSlide()),
     ];
     _slideKeys = List.generate(_slides.length, (_) => GlobalKey());
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
+  void _onScroll() {
+    final idx = (_scrollController.offset / _unitExtent)
+        .round()
+        .clamp(0, _slides.length - 1);
+    if (idx != _currentSlide) {
+      setState(() {
+        _currentSlide = idx;
+        _revealed.add(idx);
+      });
+    }
+  }
+
   void _goTo(int index) {
-    setState(() => _currentSlide = index.clamp(0, _slides.length - 1));
+    final i = index.clamp(0, _slides.length - 1);
+    _scrollController.animateTo(
+      i * _unitExtent,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _handleKey(KeyEvent event) {
@@ -90,25 +115,23 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   }
 
   Future<void> _exportPdf() async {
-    setState(() => _isExporting = true);
-    final savedSlide = _currentSlide;
+    setState(() {
+      _isExporting = true;
+      _revealed.addAll(List.generate(_slides.length, (i) => i));
+    });
+    // Let any pending reveal animations settle before capturing.
+    await Future.delayed(const Duration(milliseconds: 1000));
     try {
       final images = <Uint8List>[];
-      for (int i = 0; i < _slides.length; i++) {
-        setState(() => _currentSlide = i);
-        await Future.delayed(const Duration(milliseconds: 400));
-        final bytes = await ExportService.captureSlide(_slideKeys[i]);
+      for (final key in _slideKeys) {
+        final bytes = await ExportService.captureSlide(key);
         if (bytes != null) images.add(bytes);
       }
-      setState(() => _currentSlide = savedSlide);
       if (images.isNotEmpty) {
         await ExportService.exportToPdf(images);
       }
     } finally {
-      setState(() {
-        _isExporting = false;
-        _currentSlide = savedSlide;
-      });
+      setState(() => _isExporting = false);
     }
   }
 
@@ -118,64 +141,53 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
       focusNode: _focusNode..requestFocus(),
       onKeyEvent: _handleKey,
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF1A1A1A),
         body: Stack(
           children: [
-            // Slide area
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => _goTo(_currentSlide + 1),
-                child: RepaintBoundary(
-                  key: _slideKeys[_currentSlide],
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) =>
-                        FadeTransition(opacity: animation, child: child),
-                    child: SizedBox.expand(
-                      key: ValueKey(_currentSlide),
-                      child: _slides[_currentSlide].builder(context),
-                    ),
+            Column(
+              children: [
+                _NavBar(
+                  items: const [
+                    _NavItem('Home', 0),
+                    _NavItem('Solution', 3),
+                    _NavItem('Team', 7),
+                    _NavItem('Contact', 8),
+                  ],
+                  currentIndex: _currentSlide,
+                  isExporting: _isExporting,
+                  onNavigate: _goTo,
+                  onExport: _exportPdf,
+                ),
+                // Seamless full-bleed sections — each fills the viewport
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final w = constraints.maxWidth;
+                      final h = constraints.maxHeight;
+                      _unitExtent = h;
+                      return SingleChildScrollView(
+                        controller: _scrollController,
+                        child: Column(
+                          children: [
+                            for (int i = 0; i < _slides.length; i++)
+                              RepaintBoundary(
+                                key: _slideKeys[i],
+                                child: RevealScope(
+                                  active: _revealed.contains(i),
+                                  child: SizedBox(
+                                    width: w,
+                                    height: h,
+                                    child: _slides[i].builder(context),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-            ),
-
-            // Top toolbar
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: _Toolbar(
-                currentSlide: _currentSlide,
-                totalSlides: _slides.length,
-                slideLabel: _slides[_currentSlide].label,
-                isExporting: _isExporting,
-                onPrev: () => _goTo(_currentSlide - 1),
-                onNext: () => _goTo(_currentSlide + 1),
-                onExport: _exportPdf,
-              ),
-            ),
-
-            // Right side dot navigation
-            Positioned(
-              right: 20,
-              top: 48,
-              bottom: 0,
-              child: Center(
-                child: DotNavigation(
-                  slideCount: _slides.length,
-                  currentIndex: _currentSlide,
-                  onDotTapped: _goTo,
-                ),
-              ),
-            ),
-
-            // Aspect ratio indicator — must be a Positioned direct Stack child
-            const Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _AspectRatioGuard(),
+              ],
             ),
 
             // Export progress overlay
@@ -205,164 +217,156 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   }
 }
 
-class _Toolbar extends StatelessWidget {
-  final int currentSlide;
-  final int totalSlides;
-  final String slideLabel;
+class _NavItem {
+  final String label;
+  final int slideIndex;
+  const _NavItem(this.label, this.slideIndex);
+}
+
+class _NavBar extends StatelessWidget {
+  final List<_NavItem> items;
+  final int currentIndex;
   final bool isExporting;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
+  final ValueChanged<int> onNavigate;
   final VoidCallback onExport;
 
-  const _Toolbar({
-    required this.currentSlide,
-    required this.totalSlides,
-    required this.slideLabel,
+  const _NavBar({
+    required this.items,
+    required this.currentIndex,
     required this.isExporting,
-    required this.onPrev,
-    required this.onNext,
+    required this.onNavigate,
     required this.onExport,
   });
+
+  int get _activeSlideIndex {
+    int active = items.first.slideIndex;
+    for (final item in items) {
+      if (currentIndex >= item.slideIndex) active = item.slideIndex;
+    }
+    return active;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48,
-      color: Colors.black.withValues(alpha: 0.88),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      height: 60,
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        border: Border(
+          bottom: BorderSide(color: Colors.white12, width: 1),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Row(
         children: [
-          const Text(
-            'PITCH DECK',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-              letterSpacing: 2,
+          // Brand — scrolls to top
+          InkWell(
+            onTap: () => onNavigate(0),
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'ALLWAYS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF5C842),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const Spacer(),
-          Text(
-            '$slideLabel  •  ${currentSlide + 1} / $totalSlides',
-            style: const TextStyle(color: Colors.white54, fontSize: 12),
+          const SizedBox(width: 28),
+          // Section links — scroll horizontally if space is tight
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final item in items)
+                    _NavLink(
+                      label: item.label,
+                      active: item.slideIndex == _activeSlideIndex,
+                      onTap: () => onNavigate(item.slideIndex),
+                    ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(width: 20),
-          _navBtn(Icons.arrow_back_ios_new, onPrev, currentSlide == 0),
-          const SizedBox(width: 4),
-          _navBtn(Icons.arrow_forward_ios, onNext, currentSlide == totalSlides - 1),
-          const SizedBox(width: 12),
-          TextButton.icon(
-            onPressed: isExporting ? null : onExport,
-            icon: const Icon(Icons.picture_as_pdf, size: 16, color: Color(0xFFF5C842)),
-            label: const Text(
-              'Export PDF',
-              style: TextStyle(color: Color(0xFFF5C842), fontSize: 13),
+          const SizedBox(width: 16),
+          // Export button
+          Material(
+            color: const Color(0xFFF5C842),
+            borderRadius: BorderRadius.circular(22),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: isExporting ? null : onExport,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.picture_as_pdf, size: 16, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text(
+                      'Export PDF',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-  Widget _navBtn(IconData icon, VoidCallback onTap, bool disabled) {
-    return IconButton(
-      onPressed: disabled ? null : onTap,
-      icon: Icon(icon, size: 14, color: disabled ? Colors.white24 : Colors.white70),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-    );
-  }
 }
 
-// ── Aspect ratio guard ──────────────────────────────────────────────────────
+class _NavLink extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
 
-class _AspectRatioGuard extends StatelessWidget {
-  const _AspectRatioGuard();
-
-  static const _target = 16.0 / 9.0;
-  static const _tolerance = 0.04; // ±4%
+  const _NavLink({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final ratio = size.width / size.height;
-    final delta = ((ratio - _target) / _target).abs();
-
-    if (delta <= _tolerance) return const SizedBox.shrink();
-
-    return _Banner(
-      isTooWide: ratio > _target,
-      pct: (delta * 100).toStringAsFixed(0),
-      ratio: ratio,
-    );
-  }
-}
-
-class _Banner extends StatefulWidget {
-  final bool isTooWide;
-  final String pct;
-  final double ratio;
-  const _Banner({required this.isTooWide, required this.pct, required this.ratio});
-
-  @override
-  State<_Banner> createState() => _BannerState();
-}
-
-class _BannerState extends State<_Banner> with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _anim;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 400));
-    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _ctrl.forward();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 1),
-        end: Offset.zero,
-      ).animate(_anim),
-      child: Container(
-        color: const Color(0xFFF5C842),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Row(
-          children: [
-            const Icon(Icons.aspect_ratio, size: 18, color: Colors.black),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                widget.isTooWide
-                    ? 'Window is ${widget.pct}% too wide for 16:9 — resize to match PowerPoint ratio'
-                    : 'Window is ${widget.pct}% too tall for 16:9 — resize to match PowerPoint ratio',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Current ${widget.ratio.toStringAsFixed(2)}  ·  Target 1.78',
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? const Color(0xFFF5C842) : Colors.white70,
+            fontSize: 13,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+            letterSpacing: 0.2,
+          ),
         ),
       ),
     );

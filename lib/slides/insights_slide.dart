@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class InsightsSlide extends StatelessWidget {
   const InsightsSlide({super.key});
@@ -94,18 +95,25 @@ class InsightsSlide extends StatelessWidget {
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _quotes
-                        .expand((q) => [
-                              Expanded(child: _quoteCard(q)),
-                              if (q != _quotes.last)
-                                const SizedBox(width: 14),
-                            ])
-                        .toList(),
+                    children: [
+                      for (int i = 0; i < _quotes.length; i++) ...[
+                        Expanded(
+                          child: Reveal(
+                            delayMs: i * 90,
+                            child: _quoteCard(_quotes[i]),
+                          ),
+                        ),
+                        if (i != _quotes.length - 1)
+                          const SizedBox(width: 14),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 // Potential applications bar
-                Container(
+                Reveal(
+                  delayMs: 420,
+                  child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 20),
                   decoration: BoxDecoration(
@@ -151,6 +159,7 @@ class InsightsSlide extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
                 ),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class SolutionSlide extends StatelessWidget {
   const SolutionSlide({super.key});
@@ -57,11 +58,11 @@ class SolutionSlide extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _image(_steps[0])),
+                    Expanded(child: Reveal(delayMs: 0, child: _image(_steps[0]))),
                     _arrow(),
-                    Expanded(child: _image(_steps[1])),
+                    Expanded(child: Reveal(delayMs: 110, child: _image(_steps[1]))),
                     _arrow(),
-                    Expanded(child: _image(_steps[2])),
+                    Expanded(child: Reveal(delayMs: 220, child: _image(_steps[2]))),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -70,11 +71,11 @@ class SolutionSlide extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: _card(_steps[0])),
+                      Expanded(child: Reveal(delayMs: 160, child: _card(_steps[0]))),
                       const SizedBox(width: _arrowW),
-                      Expanded(child: _card(_steps[1])),
+                      Expanded(child: Reveal(delayMs: 270, child: _card(_steps[1]))),
                       const SizedBox(width: _arrowW),
-                      Expanded(child: _card(_steps[2])),
+                      Expanded(child: Reveal(delayMs: 380, child: _card(_steps[2]))),
                     ],
                   ),
                 ),

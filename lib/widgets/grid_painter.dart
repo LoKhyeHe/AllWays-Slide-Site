@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 class GridPainter extends CustomPainter {
+  final Color color;
+  const GridPainter({this.color = const Color(0x0D000000)});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.05)
+      ..color = color
       ..strokeWidth = 1;
     const step = 40.0;
     for (double x = 0; x < size.width; x += step) {

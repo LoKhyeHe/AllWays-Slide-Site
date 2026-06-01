@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class CoverSlide extends StatelessWidget {
   const CoverSlide({super.key});
@@ -19,7 +20,8 @@ class CoverSlide extends StatelessWidget {
                 // Left — title + name evolution + tagline
                 Expanded(
                   flex: 5,
-                  child: Column(
+                  child: Reveal(
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -98,6 +100,7 @@ class CoverSlide extends StatelessWidget {
                       ),
                     ],
                   ),
+                  ),
                 ),
                 const SizedBox(width: 48),
                 // Right — poster fit fully within slide height
@@ -109,7 +112,10 @@ class CoverSlide extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Flexible(
-                          child: AspectRatio(
+                          child: Reveal(
+                            delayMs: 180,
+                            beginOffset: const Offset(0.12, 0),
+                            child: AspectRatio(
                             aspectRatio: 2245 / 3179,
                             child: Container(
                               decoration: BoxDecoration(
@@ -131,6 +137,7 @@ class CoverSlide extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          ),
                           ),
                         ),
                       ],

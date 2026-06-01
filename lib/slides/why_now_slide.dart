@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class WhyNowSlide extends StatelessWidget {
   const WhyNowSlide({super.key});
@@ -61,7 +62,8 @@ class WhyNowSlide extends StatelessWidget {
                     // Left 1/3: photo
                     Expanded(
                       flex: 1,
-                      child: Column(
+                      child: Reveal(
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -81,6 +83,7 @@ class WhyNowSlide extends StatelessWidget {
                           ),
                         ],
                       ),
+                      ),
                     ),
                     const SizedBox(width: 28),
                     // Right 2/3: 4 stat cards
@@ -89,12 +92,16 @@ class WhyNowSlide extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
-                        children: _stats
-                            .expand((s) => [
-                                  _statCard(s),
-                                  if (s != _stats.last) const SizedBox(height: 10),
-                                ])
-                            .toList(),
+                        children: [
+                          for (int i = 0; i < _stats.length; i++) ...[
+                            Reveal(
+                              delayMs: 120 + i * 90,
+                              child: _statCard(_stats[i]),
+                            ),
+                            if (i != _stats.length - 1)
+                              const SizedBox(height: 10),
+                          ],
+                        ],
                       ),
                     ),
                   ],

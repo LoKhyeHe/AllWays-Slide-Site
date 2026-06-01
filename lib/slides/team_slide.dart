@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class TeamSlide extends StatelessWidget {
   const TeamSlide({super.key});
@@ -10,12 +12,15 @@ class TeamSlide extends StatelessWidget {
       role: 'Product & Business Development',
       focus: 'Embedded systems, product design, and human-centred development.',
       photo: 'lib/images/Headshots/Khye he.jpg',
+      linkedin: 'https://linkedin.com/in/khyehe',
+      portfolio: 'https://lokhyehe.github.io/KhyeFolio/',
     ),
     _Member(
       name: 'Lee Yi Xiang',
       role: 'Mechanical & Electronics',
       focus: 'UWB hardware, embedded systems, and mechanical integration.',
       photo: 'lib/images/Headshots/YiXiang.jpg',
+      linkedin: 'https://linkedin.com/in/lee-yi-xiang',
     ),
     _Member(
       name: 'Ngo Eu Gene',
@@ -23,20 +28,31 @@ class TeamSlide extends StatelessWidget {
       focus: 'Belt ergonomics, industrial design, and prototype assembly.',
       photo: 'lib/images/Headshots/Eu Gene.jpg',
       photoAlignment: Alignment.topCenter,
+      linkedin: 'https://linkedin.com/in/ngoeugene',
     ),
     _Member(
       name: 'Rachel Kok',
       role: 'Electronics and UI/UX',
       focus: 'Circuit design, accessible interface design, and user research.',
       photo: 'lib/images/Headshots/Rachel.jpg',
+      linkedin: 'https://linkedin.com/in/rachelkokjingyi',
     ),
     _Member(
       name: 'Jaryl Chan',
       role: 'Software Architecture',
       focus: 'Navigation algorithms, app development, and system integration.',
       photo: 'lib/images/Headshots/Jaryl.jpg',
+      linkedin: 'https://linkedin.com/in/jaryl-chan-jun-xiang',
     ),
   ];
+
+  Future<void> _open(String url) async {
+    await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.platformDefault,
+      webOnlyWindowName: '_blank',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,13 +80,18 @@ class TeamSlide extends StatelessWidget {
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _members
-                        .expand((m) => [
-                              Expanded(child: _memberCard(m)),
-                              if (m != _members.last)
-                                const SizedBox(width: 14),
-                            ])
-                        .toList(),
+                    children: [
+                      for (int i = 0; i < _members.length; i++) ...[
+                        Expanded(
+                          child: Reveal(
+                            delayMs: i * 90,
+                            child: _memberCard(_members[i]),
+                          ),
+                        ),
+                        if (i != _members.length - 1)
+                          const SizedBox(width: 14),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -148,11 +169,86 @@ class TeamSlide extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _LinkChip(
+                        icon: _linkedInGlyph(),
+                        label: 'LinkedIn',
+                        onTap: () => _open(m.linkedin),
+                      ),
+                      if (m.portfolio != null) ...[
+                        const SizedBox(width: 8),
+                        _LinkChip(
+                          icon: const Icon(Icons.language,
+                              size: 14, color: Colors.black87),
+                          label: 'WebFolio',
+                          onTap: () => _open(m.portfolio!),
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _linkedInGlyph() {
+    return Container(
+      width: 16,
+      height: 16,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A66C2),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      alignment: Alignment.center,
+      child: const Text(
+        'in',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          height: 1,
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkChip extends StatelessWidget {
+  final Widget icon;
+  final String label;
+  final VoidCallback onTap;
+  const _LinkChip(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -164,10 +260,14 @@ class _Member {
   final String focus;
   final String photo;
   final Alignment photoAlignment;
+  final String linkedin;
+  final String? portfolio;
   const _Member(
       {required this.name,
       required this.role,
       required this.focus,
       required this.photo,
+      required this.linkedin,
+      this.portfolio,
       this.photoAlignment = Alignment.topCenter});
 }

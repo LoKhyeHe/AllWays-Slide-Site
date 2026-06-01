@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class PrototypeSlide extends StatelessWidget {
   const PrototypeSlide({super.key});
@@ -46,7 +47,8 @@ class PrototypeSlide extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        AspectRatio(
+                        Reveal(
+                          child: AspectRatio(
                           aspectRatio: 9 / 19.5,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
@@ -55,6 +57,7 @@ class PrototypeSlide extends StatelessWidget {
                               fit: BoxFit.cover,
                               alignment: Alignment(0, -1),
                             ),
+                          ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -79,9 +82,9 @@ class PrototypeSlide extends StatelessWidget {
                               Expanded(
                                 child: Row(
                                   children: [
-                                    Expanded(child: _featureCard(_features[0])),
+                                    Expanded(child: Reveal(delayMs: 80, child: _featureCard(_features[0]))),
                                     const SizedBox(width: 10),
-                                    Expanded(child: _featureCard(_features[1])),
+                                    Expanded(child: Reveal(delayMs: 160, child: _featureCard(_features[1]))),
                                   ],
                                 ),
                               ),
@@ -89,9 +92,9 @@ class PrototypeSlide extends StatelessWidget {
                               Expanded(
                                 child: Row(
                                   children: [
-                                    Expanded(child: _featureCard(_features[2])),
+                                    Expanded(child: Reveal(delayMs: 240, child: _featureCard(_features[2]))),
                                     const SizedBox(width: 10),
-                                    Expanded(child: _featureCard(_features[3])),
+                                    Expanded(child: Reveal(delayMs: 320, child: _featureCard(_features[3]))),
                                   ],
                                 ),
                               ),
@@ -110,7 +113,9 @@ class PrototypeSlide extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       flex: 3,
-                                      child: ClipRRect(
+                                      child: Reveal(
+                                        delayMs: 360,
+                                        child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: SizedBox(
                                           width: double.infinity,
@@ -120,11 +125,14 @@ class PrototypeSlide extends StatelessWidget {
                                           ),
                                         ),
                                       ),
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       flex: 2,
-                                      child: ClipRRect(
+                                      child: Reveal(
+                                        delayMs: 440,
+                                        child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: SizedBox(
                                           width: double.infinity,
@@ -133,6 +141,7 @@ class PrototypeSlide extends StatelessWidget {
                                             fit: BoxFit.cover,
                                           ),
                                         ),
+                                      ),
                                       ),
                                     ),
                                   ],

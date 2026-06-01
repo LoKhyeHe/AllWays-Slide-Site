@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class ImpactSlide extends StatelessWidget {
   const ImpactSlide({super.key});
@@ -36,7 +37,8 @@ class ImpactSlide extends StatelessWidget {
             // ── Left column ───────────────────────────────────────────────
             Expanded(
               flex: 5,
-              child: Column(
+              child: Reveal(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -75,6 +77,7 @@ class ImpactSlide extends StatelessWidget {
                   ),
                 ],
               ),
+              ),
             ),
             const SizedBox(width: 32),
             // ── Right column ──────────────────────────────────────────────
@@ -100,9 +103,9 @@ class ImpactSlide extends StatelessWidget {
                         Expanded(
                           child: Row(
                             children: [
-                              Expanded(child: _groupCard(_groups[0])),
+                              Expanded(child: Reveal(delayMs: 100, child: _groupCard(_groups[0]))),
                               const SizedBox(width: 10),
-                              Expanded(child: _groupCard(_groups[1])),
+                              Expanded(child: Reveal(delayMs: 180, child: _groupCard(_groups[1]))),
                             ],
                           ),
                         ),
@@ -110,9 +113,9 @@ class ImpactSlide extends StatelessWidget {
                         Expanded(
                           child: Row(
                             children: [
-                              Expanded(child: _groupCard(_groups[2])),
+                              Expanded(child: Reveal(delayMs: 260, child: _groupCard(_groups[2]))),
                               const SizedBox(width: 10),
-                              Expanded(child: _groupCard(_groups[3])),
+                              Expanded(child: Reveal(delayMs: 340, child: _groupCard(_groups[3]))),
                             ],
                           ),
                         ),
@@ -163,7 +166,9 @@ class ImpactSlide extends StatelessWidget {
                   // OUR MISSION
                   Expanded(
                     flex: 3,
-                    child: Container(
+                    child: Reveal(
+                      delayMs: 420,
+                      child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
@@ -195,6 +200,7 @@ class ImpactSlide extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
                     ),
                   ),
                 ],

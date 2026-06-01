@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
+import '../widgets/reveal.dart';
 
 class ProblemSlide extends StatelessWidget {
   const ProblemSlide({super.key});
@@ -24,7 +25,8 @@ class ProblemSlide extends StatelessWidget {
                       // Left — title pinned just above the image, all centred as a group
                       Expanded(
                         flex: 4,
-                        child: Column(
+                        child: Reveal(
+                          child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -61,6 +63,7 @@ class ProblemSlide extends StatelessWidget {
                             ),
                           ],
                         ),
+                        ),
                       ),
                       const SizedBox(width: 36),
                       // Right — HMW + context, vertically centred
@@ -71,7 +74,9 @@ class ProblemSlide extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // White HMW card
-                            Container(
+                            Reveal(
+                              delayMs: 120,
+                              child: Container(
                               padding: const EdgeInsets.all(22),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -111,9 +116,12 @@ class ProblemSlide extends StatelessWidget {
                                 ],
                               ),
                             ),
+                            ),
                             const SizedBox(height: 18),
                             // Yellow context card
-                            StickyCard(
+                            Reveal(
+                              delayMs: 220,
+                              child: StickyCard(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -158,6 +166,7 @@ class ProblemSlide extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                            ),
                             ),
                           ],
                         ),
