@@ -1,7 +1,7 @@
 {
   "cover_poster":      { "alignX": 0.0, "alignY": 0.0, "height": 480.0 },
   "why_now_bus":       { "alignX": 0.0, "alignY": 0.0, "height": 290.0 },
-  "problem_photo":     { "alignX": 0.0, "alignY": 0.0, "height": 200.0 },
+  "problem_photo":     { "alignX": 0.0, "alignY": 0.0 },
   "solution_journey":  { "alignX": 0.0, "alignY": 0.0 },
   "solution_pickup":   { "alignX": 0.0, "alignY": 0.0, "height": 340.0 },
   "solution_app":      { "alignX": 0.0, "alignY": 0.0, "height": 340.0 },

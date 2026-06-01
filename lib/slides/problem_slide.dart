@@ -40,12 +40,14 @@ class ProblemSlide extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 14),
-                            EditableImage(
-                              configKey: 'problem_photo',
-                              assetPath: 'lib/images/school_visit.jpeg',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              borderRadius: BorderRadius.circular(8),
+                            Expanded(
+                              child: EditableImage(
+                                configKey: 'problem_photo',
+                                assetPath: 'lib/images/school_visit.jpeg',
+                                fit: BoxFit.cover,
+                                expand: true,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                             const SizedBox(height: 8),
                             const Text(
