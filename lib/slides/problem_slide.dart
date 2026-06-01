@@ -7,12 +7,20 @@ class ProblemSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,8 +184,130 @@ class ProblemSlide extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
+          );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Reveal(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'THE PROBLEM',
+              style: TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.w900,
+                height: 0.95,
+                letterSpacing: -1.5,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'lib/images/school_visit.jpeg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'User testing with Hafiz and Zhi Yin — Singapore Association of the Visually Handicapped',
+              style:
+                  TextStyle(fontSize: 11, color: Colors.black38, height: 1.4),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: const Text(
+                      'HOW MIGHT WE',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Empower visually impaired individuals to navigate any indoor space self-reliantly — with a system intuitive enough to use immediately, and reliable enough to trust completely?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            StickyCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Indoor spaces are designed to be accessible — but not independently navigable.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _row(Icons.map_outlined,
+                      'Complex layouts offer no spatial cues for those who cannot read signs or directories.'),
+                  const SizedBox(height: 10),
+                  _row(Icons.gps_off_outlined,
+                      'GPS signals don\'t penetrate buildings — indoor positioning remains an unsolved gap.'),
+                  const SizedBox(height: 10),
+                  _row(Icons.support_agent_outlined,
+                      'Users depend on staff or companions — surrendering the independence they deserve.'),
+                  const SizedBox(height: 10),
+                  _row(Icons.elderly_outlined,
+                      'As Singapore ages, the number of people affected will only grow.'),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      '"Getting into the building is one thing. Finding where I need to go inside is another."',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.black87,
+                          height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

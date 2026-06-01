@@ -33,12 +33,125 @@ class SolutionSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'OUR SOLUTION',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+              letterSpacing: -1.5,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 18),
+          for (int i = 0; i < _steps.length; i++) ...[
+            Reveal(
+              delayMs: i * 90,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(
+                      _steps[i].imagePath,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 200,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _mobileCard(_steps[i]),
+                ],
+              ),
+            ),
+            if (i != _steps.length - 1) const SizedBox(height: 20),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileCard(_Step s) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                s.number,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFF5C842),
+                  height: 1,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  s.label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            s.title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Colors.black,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            s.detail,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black54,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,10 +194,7 @@ class SolutionSlide extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   Widget _image(_Step s) {

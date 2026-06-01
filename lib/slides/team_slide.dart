@@ -56,12 +56,20 @@ class TeamSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.fromLTRB(48, 36, 48, 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,6 +101,116 @@ class TeamSlide extends StatelessWidget {
                       ],
                     ],
                   ),
+                ),
+              ],
+            ),
+          );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'THE TEAM',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+              letterSpacing: -1.5,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 20),
+          for (int i = 0; i < _members.length; i++) ...[
+            Reveal(delayMs: i * 70, child: _mobileCard(_members[i])),
+            if (i != _members.length - 1) const SizedBox(height: 14),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileCard(_Member m) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 240,
+            child: Image.asset(
+              m.photo,
+              fit: BoxFit.cover,
+              alignment: m.photoAlignment,
+            ),
+          ),
+          Container(height: 3, color: const Color(0xFFF5C842)),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  m.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: Colors.black,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  m.role,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFF5C842),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  m.focus,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _LinkChip(
+                      icon: _linkedInGlyph(),
+                      label: 'LinkedIn',
+                      onTap: () => _open(m.linkedin),
+                    ),
+                    if (m.portfolio != null) ...[
+                      const SizedBox(width: 8),
+                      _LinkChip(
+                        icon: const Icon(Icons.language,
+                            size: 14, color: Colors.black87),
+                        label: 'WebFolio',
+                        onTap: () => _open(m.portfolio!),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

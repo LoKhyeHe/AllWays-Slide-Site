@@ -37,12 +37,122 @@ class InsightsSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'STAKEHOLDER INSIGHTS',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+              height: 1.0,
+              letterSpacing: -1.2,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _orgs
+                .map((o) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(o,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700)),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Organisations engaged across social service, accessibility, design, and arts sectors.',
+            style: TextStyle(fontSize: 12, color: Colors.black45),
+          ),
+          const SizedBox(height: 20),
+          for (int i = 0; i < _quotes.length; i++) ...[
+            Reveal(
+                delayMs: i * 80, child: _quoteCard(_quotes[i], fill: false)),
+            if (i != _quotes.length - 1) const SizedBox(height: 14),
+          ],
+          const SizedBox(height: 16),
+          Reveal(
+            delayMs: 360,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5C842),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.lightbulb_outline,
+                            size: 20, color: Colors.black),
+                      ),
+                      const SizedBox(width: 14),
+                      const Text(
+                        'POTENTIAL IS VAST',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                          color: Color(0xFFF5C842),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Supermarkets · Hospitals · Bus Terminals · Schools · Campuses · Museums',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white70,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,13 +273,10 @@ class InsightsSlide extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
-  Widget _quoteCard(_Quote q) {
+  Widget _quoteCard(_Quote q, {bool fill = true}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -204,8 +311,20 @@ class InsightsSlide extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // Quote text
-          Expanded(
-            child: Text(
+          if (fill)
+            Expanded(
+              child: Text(
+                q.text,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  height: 1.6,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )
+          else
+            Text(
               q.text,
               style: const TextStyle(
                 fontSize: 13,
@@ -214,7 +333,6 @@ class InsightsSlide extends StatelessWidget {
                 fontStyle: FontStyle.italic,
               ),
             ),
-          ),
           const SizedBox(height: 12),
           // Attribution row
           Row(

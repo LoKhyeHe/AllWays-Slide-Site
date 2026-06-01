@@ -18,9 +18,107 @@ class PrototypeSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.black,
-      child: Padding(
+      child: isMobile ? _mobile() : _desktop(),
+    );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'OUR PROTOTYPE',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+              letterSpacing: -1.5,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: SizedBox(
+              width: 180,
+              child: Reveal(
+                child: Column(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 9 / 19.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'lib/images/app_ui.jpeg',
+                          fit: BoxFit.cover,
+                          alignment: const Alignment(0, -1),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'VoiceOver UI/UX Compatible Design',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white38, fontSize: 11, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          for (int i = 0; i < _features.length; i++) ...[
+            Reveal(delayMs: 80 + i * 70, child: _featureCard(_features[i])),
+            if (i != _features.length - 1) const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 16),
+          Reveal(
+            delayMs: 360,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'lib/images/techable_testing.jpeg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Tech Analyst · Kwek Bin · TechAble · Navigation testing',
+            style: TextStyle(fontSize: 10, color: Colors.white38),
+          ),
+          const SizedBox(height: 14),
+          Reveal(
+            delayMs: 440,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'lib/images/belt_testing.jpeg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Asst Director · Joice · AWWA · Viewing exhibition prototype',
+            style: TextStyle(fontSize: 10, color: Colors.white38),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,8 +277,7 @@ class PrototypeSlide extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _featureCard(_Feature f) {

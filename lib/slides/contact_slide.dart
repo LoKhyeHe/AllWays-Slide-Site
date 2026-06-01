@@ -19,24 +19,26 @@ class ContactSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.black,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(color: Colors.white10), size: Size.infinite),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 40),
+            padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 24 : 56, vertical: 40),
             child: Center(
               child: Reveal(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       'INTERESTED IN\nWORKING WITH US?',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 52,
+                        fontSize: isMobile ? 34 : 52,
                         fontWeight: FontWeight.w900,
                         height: 0.98,
                         letterSpacing: -2,
@@ -44,9 +46,9 @@ class ContactSlide extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const SizedBox(
-                      width: 620,
-                      child: Text(
+                    SizedBox(
+                      width: isMobile ? double.infinity : 620,
+                      child: const Text(
                         'We\'re looking for pilot partners, facilities, and collaborators to bring accessible indoor navigation to the people who need it. Reach out — we\'d love to talk.',
                         textAlign: TextAlign.center,
                         style: TextStyle(

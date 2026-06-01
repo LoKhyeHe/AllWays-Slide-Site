@@ -54,6 +54,9 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   double _unitExtent = 1;
   final Set<int> _revealed = {0};
 
+  static const double _navBarHeight = 60;
+  static const double _mobileBreakpoint = 760;
+
   @override
   void initState() {
     super.initState();
@@ -81,9 +84,19 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   }
 
   void _onScroll() {
-    final idx = (_scrollController.offset / _unitExtent)
-        .round()
-        .clamp(0, _slides.length - 1);
+    // Key-based detection so it works for both fixed-height (desktop) and
+    // variable-height (mobile) sections. The current section is the last one
+    // whose top has scrolled above a reference line near the top of the
+    // viewport (just below the nav bar).
+    final refY = _navBarHeight + _unitExtent * 0.4;
+    int idx = 0;
+    for (int i = 0; i < _slideKeys.length; i++) {
+      final ctx = _slideKeys[i].currentContext;
+      final box = ctx?.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) continue;
+      final top = box.localToGlobal(Offset.zero).dy;
+      if (top <= refY) idx = i;
+    }
     if (idx != _currentSlide) {
       setState(() {
         _currentSlide = idx;
@@ -94,8 +107,11 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
 
   void _goTo(int index) {
     final i = index.clamp(0, _slides.length - 1);
-    _scrollController.animateTo(
-      i * _unitExtent,
+    final ctx = _slideKeys[i].currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      alignment: 0.0,
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
     );
@@ -165,6 +181,7 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
                       final w = constraints.maxWidth;
                       final h = constraints.maxHeight;
                       _unitExtent = h;
+                      final isMobile = w < _mobileBreakpoint;
                       return SingleChildScrollView(
                         controller: _scrollController,
                         child: Column(
@@ -176,8 +193,20 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
                                   active: _revealed.contains(i),
                                   child: SizedBox(
                                     width: w,
-                                    height: h,
-                                    child: _slides[i].builder(context),
+                                    child: isMobile
+                                        // Mobile: let sections grow taller than
+                                        // the viewport so content stacks freely.
+                                        ? ConstrainedBox(
+                                            constraints:
+                                                BoxConstraints(minHeight: h),
+                                            child: _slides[i].builder(context),
+                                          )
+                                        // Desktop: each section fills exactly
+                                        // one viewport.
+                                        : SizedBox(
+                                            height: h,
+                                            child: _slides[i].builder(context),
+                                          ),
                                   ),
                                 ),
                               ),
@@ -248,6 +277,7 @@ class _NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       height: 60,
       decoration: const BoxDecoration(
@@ -256,7 +286,7 @@ class _NavBar extends StatelessWidget {
           bottom: BorderSide(color: Colors.white12, width: 1),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 28),
       child: Row(
         children: [
           // Brand — scrolls to top
@@ -269,7 +299,7 @@ class _NavBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
-                    'ALLWAYS',
+                    'AllWays',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
@@ -290,7 +320,7 @@ class _NavBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 28),
+          SizedBox(width: isMobile ? 12 : 28),
           // Section links — scroll horizontally if space is tight
           Expanded(
             child: SingleChildScrollView(
@@ -307,29 +337,33 @@ class _NavBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          // Export button
+          const SizedBox(width: 12),
+          // Export button — icon-only on mobile to save width
           Material(
             color: const Color(0xFFF5C842),
             borderRadius: BorderRadius.circular(22),
             child: InkWell(
               borderRadius: BorderRadius.circular(22),
               onTap: isExporting ? null : onExport,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 10 : 16, vertical: 9),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.picture_as_pdf, size: 16, color: Colors.black),
-                    SizedBox(width: 8),
-                    Text(
-                      'Export PDF',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                    const Icon(Icons.picture_as_pdf,
+                        size: 16, color: Colors.black),
+                    if (!isMobile) ...const [
+                      SizedBox(width: 8),
+                      Text(
+                        'Export PDF',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

@@ -27,9 +27,138 @@ class ImpactSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: const Color(0xFFF5C842),
-      child: Padding(
+      child: isMobile ? _mobile() : _desktop(),
+    );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'IMPACT VISION',
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+              letterSpacing: -1.5,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const WashiTape(color: Color(0xFFB8D4C8), width: 90, height: 22),
+          const SizedBox(height: 24),
+          const Text(
+            'WHO BENEFITS',
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                color: Colors.black54),
+          ),
+          const SizedBox(height: 10),
+          for (int i = 0; i < _groups.length; i++) ...[
+            Reveal(delayMs: i * 70, child: _groupCard(_groups[i])),
+            if (i != _groups.length - 1) const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 24),
+          const Text(
+            'BENEFICIARY PARTNERS',
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                color: Colors.black54),
+          ),
+          const SizedBox(height: 10),
+          for (int i = 0; i < _partners.length; i++) ...[
+            _partnerCard(_partners[i]),
+            if (i != _partners.length - 1) const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.black12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.alt_route_outlined,
+                    size: 18, color: Colors.black54),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('REACH STRATEGY',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.5,
+                              color: Colors.black54)),
+                      SizedBox(height: 6),
+                      Text(
+                        'Pilots with AWWA, SAVH, and SGEnable — reaching visually impaired users in school and community settings, before expanding to hospitals and public transit.',
+                        style: TextStyle(
+                            fontSize: 13, color: Colors.black87, height: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Reveal(
+            delayMs: 200,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'OUR MISSION',
+                    style: TextStyle(
+                      color: Color(0xFFF5C842),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Make indoor spaces navigable — independently — for every visually impaired person.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 40),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -208,8 +337,7 @@ class ImpactSlide extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _partnerCard(_Partner p) {

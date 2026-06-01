@@ -34,12 +34,69 @@ class WhyNowSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'WHY NOW?',
+            style: TextStyle(
+              fontSize: 38,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+              letterSpacing: -1.5,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Reveal(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'lib/images/KwekBin Bus.jpg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 200,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Kwek Bin navigating a bus terminal — a daily challenge for the visually impaired.',
+                  style: TextStyle(
+                      fontSize: 10, color: Colors.black38, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          for (int i = 0; i < _stats.length; i++) ...[
+            Reveal(delayMs: 80 + i * 70, child: _statCard(_stats[i])),
+            if (i != _stats.length - 1) const SizedBox(height: 10),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,10 +165,7 @@ class WhyNowSlide extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   Widget _statCard(_Stat s) {

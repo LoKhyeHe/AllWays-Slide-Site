@@ -7,12 +7,20 @@ class CoverSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 760;
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           CustomPaint(painter: GridPainter(), size: Size.infinite),
-          Padding(
+          if (isMobile) _mobile() else _desktop(),
+        ],
+      ),
+    );
+  }
+
+  Widget _desktop() {
+    return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 40),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -50,7 +58,7 @@ class CoverSlide extends StatelessWidget {
                             const Icon(Icons.arrow_forward, color: Color(0xFFF5C842), size: 12),
                             const SizedBox(width: 8),
                             const Text(
-                              'ALLWAYS',
+                              'AllWays',
                               style: TextStyle(
                                 color: Color(0xFFF5C842),
                                 fontSize: 11,
@@ -63,7 +71,7 @@ class CoverSlide extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        'ALLWAYS',
+                        'AllWays',
                         style: TextStyle(
                           fontSize: 80,
                           fontWeight: FontWeight.w900,
@@ -146,8 +154,101 @@ class CoverSlide extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
+          );
+  }
+
+  Widget _mobile() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+      child: Reveal(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'PULSEPATH',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                      decoration: TextDecoration.lineThrough,
+                      decorationColor: Colors.white.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward,
+                      color: Color(0xFFF5C842), size: 12),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'AllWays',
+                    style: TextStyle(
+                      color: Color(0xFFF5C842),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'AllWays',
+              style: TextStyle(
+                fontSize: 56,
+                fontWeight: FontWeight.w900,
+                height: 0.95,
+                letterSpacing: -2,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Indoor navigation that guides the visually impaired through touch.',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _pill('UWB Positioning'),
+                _pill('Haptic Feedback'),
+                _pill('Accessibility'),
+              ],
+            ),
+            const SizedBox(height: 24),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'lib/images/belt_poster.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'TechAble  ·  AWWA  ·  SAVH  ·  SUTD',
+              style: TextStyle(
+                  fontSize: 11, color: Colors.black38, letterSpacing: 1),
+            ),
+          ],
+        ),
       ),
     );
   }
