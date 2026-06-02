@@ -17,7 +17,9 @@ class RevealScope extends InheritedWidget {
   bool updateShouldNotify(RevealScope old) => old.active != active;
 }
 
-/// Fades + slides its child in once the enclosing [RevealScope] becomes active.
+/// Fades + slides its child in while the enclosing [RevealScope] is active,
+/// and clears it back out (reverse animation) when the scope turns inactive —
+/// so content re-animates each time you enter/leave the section.
 /// Use [delayMs] to stagger sibling reveals.
 class Reveal extends StatefulWidget {
   final Widget child;
@@ -48,20 +50,29 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
   ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
 
   Timer? _timer;
-  bool _played = false;
+  bool? _wasActive;
 
-  void _maybePlay() {
-    if (_played || !RevealScope.of(context)) return;
-    _played = true;
+  // Play forward when the section becomes active, reverse out when it leaves.
+  // The stagger delay applies in both directions.
+  void _apply() {
+    final active = RevealScope.of(context);
+    if (active == _wasActive) return;
+    _wasActive = active;
+    _timer?.cancel();
     _timer = Timer(Duration(milliseconds: widget.delayMs), () {
-      if (mounted) _c.forward();
+      if (!mounted) return;
+      if (active) {
+        _c.forward();
+      } else {
+        _c.reverse();
+      }
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _maybePlay();
+    _apply();
   }
 
   @override

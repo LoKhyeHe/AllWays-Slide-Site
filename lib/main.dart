@@ -52,7 +52,6 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   final FocusNode _focusNode = FocusNode();
 
   double _unitExtent = 1;
-  final Set<int> _revealed = {0};
 
   static const double _navBarHeight = 60;
   static const double _mobileBreakpoint = 760;
@@ -98,31 +97,8 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
       if (top <= refY) idx = i;
     }
     if (idx != _currentSlide) {
-      setState(() {
-        _currentSlide = idx;
-        _revealed.add(idx);
-      });
+      setState(() => _currentSlide = idx);
     }
-  }
-
-  // Opacity for section [i] based on how far it has scrolled out of the
-  // viewport. Full opacity while it occupies the viewport; fades to 0 over the
-  // last [fade] pixels as either edge leaves. Forced to 1 during PDF export so
-  // captured pages are never faded.
-  double _scrollOpacity(int i, double h) {
-    if (_isExporting) return 1.0;
-    final ctx = _slideKeys[i].currentContext;
-    final box = ctx?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached) return 1.0;
-    final top = box.localToGlobal(Offset.zero).dy - _navBarHeight;
-    final bottom = top + box.size.height;
-    final fade = h * 0.4;
-    if (fade <= 0) return 1.0;
-    // Fades out as the bottom edge approaches the top of the viewport, and as
-    // the top edge approaches the bottom of the viewport.
-    final leavingTop = (bottom / fade).clamp(0.0, 1.0);
-    final leavingBottom = ((h - top) / fade).clamp(0.0, 1.0);
-    return leavingTop < leavingBottom ? leavingTop : leavingBottom;
   }
 
   void _goTo(int index) {
@@ -151,10 +127,7 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
   }
 
   Future<void> _exportPdf() async {
-    setState(() {
-      _isExporting = true;
-      _revealed.addAll(List.generate(_slides.length, (i) => i));
-    });
+    setState(() => _isExporting = true);
     // Let any pending reveal animations settle before capturing.
     await Future.delayed(const Duration(milliseconds: 1000));
     try {
@@ -210,36 +183,27 @@ class _PitchDeckHomeState extends State<PitchDeckHome> {
                               RepaintBoundary(
                                 key: _slideKeys[i],
                                 child: RevealScope(
-                                  active: _revealed.contains(i),
+                                  // A section's content reveals in while it is
+                                  // the current slide, and clears back out when
+                                  // you leave. During export every section is
+                                  // active so captured pages are complete.
+                                  active: _isExporting || i == _currentSlide,
                                   child: SizedBox(
                                     width: w,
-                                    // Fade each section out as it leaves the
-                                    // viewport (and back in as it returns),
-                                    // driven by scroll position.
-                                    child: AnimatedBuilder(
-                                      animation: _scrollController,
-                                      builder: (context, child) => Opacity(
-                                        opacity: _scrollOpacity(i, h),
-                                        child: child,
-                                      ),
-                                      child: isMobile
-                                          // Mobile: let sections grow taller
-                                          // than the viewport so content stacks
-                                          // freely.
-                                          ? ConstrainedBox(
-                                              constraints:
-                                                  BoxConstraints(minHeight: h),
-                                              child:
-                                                  _slides[i].builder(context),
-                                            )
-                                          // Desktop: each section fills exactly
-                                          // one viewport.
-                                          : SizedBox(
-                                              height: h,
-                                              child:
-                                                  _slides[i].builder(context),
-                                            ),
-                                    ),
+                                    child: isMobile
+                                        // Mobile: let sections grow taller than
+                                        // the viewport so content stacks freely.
+                                        ? ConstrainedBox(
+                                            constraints:
+                                                BoxConstraints(minHeight: h),
+                                            child: _slides[i].builder(context),
+                                          )
+                                        // Desktop: each section fills exactly
+                                        // one viewport.
+                                        : SizedBox(
+                                            height: h,
+                                            child: _slides[i].builder(context),
+                                          ),
                                   ),
                                 ),
                               ),
