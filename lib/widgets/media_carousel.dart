@@ -28,14 +28,22 @@ class MediaCarousel extends StatefulWidget {
 class _MediaCarouselState extends State<MediaCarousel> {
   late final PageController _pageController;
   int _index = 0;
+  double _page = 0;
 
   // One controller per video item, keyed by item index.
   final Map<int, VideoPlayerController> _videos = {};
+  // Error message per video item, if initialization failed.
+  final Map<int, String> _videoErrors = {};
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    // viewportFraction < 1 so the previous/next items peek on each side.
+    _pageController = PageController(viewportFraction: 0.74)
+      ..addListener(() {
+        final p = _pageController.page;
+        if (p != null) setState(() => _page = p);
+      });
     for (var i = 0; i < widget.items.length; i++) {
       final item = widget.items[i];
       if (item.isVideo) {
@@ -47,6 +55,9 @@ class _MediaCarouselState extends State<MediaCarousel> {
           c.setVolume(0); // muted so web autoplay is allowed
           if (_index == i) c.play();
           setState(() {});
+        }).catchError((e) {
+          if (!mounted) return;
+          setState(() => _videoErrors[i] = e.toString());
         });
       }
     }
@@ -85,6 +96,28 @@ class _MediaCarouselState extends State<MediaCarousel> {
     final item = widget.items[i];
     if (item.isVideo) {
       final c = _videos[i];
+      final err = _videoErrors[i];
+      if (err != null) {
+        return Container(
+          color: Colors.black,
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline,
+                    color: Color(0xFFF5C842), size: 32),
+                const SizedBox(height: 8),
+                Text(
+                  'Video failed to load\n$err',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       if (c == null || !c.value.isInitialized) {
         return Container(
           color: Colors.black,
@@ -101,11 +134,29 @@ class _MediaCarouselState extends State<MediaCarousel> {
         },
         child: Container(
           color: Colors.black,
-          child: Center(
-            child: AspectRatio(
-              aspectRatio: c.value.aspectRatio,
-              child: VideoPlayer(c),
-            ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Center(
+                child: AspectRatio(
+                  aspectRatio: c.value.aspectRatio,
+                  child: VideoPlayer(c),
+                ),
+              ),
+              if (!c.value.isPlaying)
+                Center(
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.play_arrow,
+                        color: Colors.white, size: 34),
+                  ),
+                ),
+            ],
           ),
         ),
       );
@@ -120,16 +171,32 @@ class _MediaCarouselState extends State<MediaCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
+    return Stack(
+      fit: StackFit.expand,
+      children: [
           PageView.builder(
             controller: _pageController,
             onPageChanged: _onPageChanged,
             itemCount: widget.items.length,
-            itemBuilder: (_, i) => _buildPage(i),
+            itemBuilder: (_, i) {
+              // Distance of this page from the centre (0 = centred).
+              final dist = (_page - i).abs().clamp(0.0, 1.0);
+              // Centre item is full-size; neighbours shrink and recede.
+              final scale = 1.0 - dist * 0.22;
+              return Center(
+                child: Transform.scale(
+                  scale: scale,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(widget.borderRadius),
+                      child: _buildPage(i),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           // Left arrow
           if (_index > 0)
@@ -171,7 +238,6 @@ class _MediaCarouselState extends State<MediaCarousel> {
             ),
           ),
         ],
-      ),
     );
   }
 

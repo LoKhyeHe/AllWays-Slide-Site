@@ -18,7 +18,7 @@ class PrototypeSlide extends StatelessWidget {
   ];
 
   static const _carouselItems = [
-    CarouselItem.video('lib/images/SUTD Project Proposal Slide.mp4'),
+    CarouselItem.video('lib/images/sutd_proposal.mp4'),
     CarouselItem.image('lib/images/techable_testing.jpeg'),
     CarouselItem.image('lib/images/belt_testing.jpeg'),
   ];
