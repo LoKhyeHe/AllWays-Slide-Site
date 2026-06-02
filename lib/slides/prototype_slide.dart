@@ -19,24 +19,21 @@ class PrototypeSlide extends StatelessWidget {
   static const _carouselItems = [
     CarouselItem.video(
       'lib/images/sutd_proposal.mp4',
-      title: 'Project Proposal Demo',
-      name: 'AllWays Team',
-      organisation: 'SUTD',
-      action: 'Concept pitch & walkthrough',
+      title: "Prototype trial run in SUTD's Incubation Room",
     ),
     CarouselItem.image(
       'lib/images/techable_testing.jpeg',
-      title: 'User Testing',
-      name: 'VI participants',
+      title: 'Tech Analyst',
+      name: 'Kwek Bin',
       organisation: 'TechAble',
-      action: 'Belt navigation trial',
+      action: 'Testing AllWays Belt Haptic Feedback',
     ),
     CarouselItem.image(
       'lib/images/belt_testing.jpeg',
-      title: 'Belt Testing',
-      name: 'AllWays Team',
-      organisation: 'In-house',
-      action: 'Durability & fit check',
+      title: 'Asst Director',
+      name: 'Joice',
+      organisation: 'AWWA',
+      action: 'Visiting Exhibition Prototype',
     ),
   ];
 
