@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/washi_tape.dart';
 import '../widgets/reveal.dart';
+import '../widgets/media_carousel.dart';
 
 class PrototypeSlide extends StatelessWidget {
   const PrototypeSlide({super.key});
@@ -14,6 +15,12 @@ class PrototypeSlide extends StatelessWidget {
         'PETG clip mechanism with universal loop attachment. Built for real-world wear.'),
     _Feature(Icons.phone_android_outlined, 'Low-Load Interface',
         'Large touch targets, simple destination selection. Validated with VI users.'),
+  ];
+
+  static const _carouselItems = [
+    CarouselItem.video('lib/images/SUTD Project Proposal Slide.mp4'),
+    CarouselItem.image('lib/images/techable_testing.jpeg'),
+    CarouselItem.image('lib/images/belt_testing.jpeg'),
   ];
 
   @override
@@ -79,37 +86,14 @@ class PrototypeSlide extends StatelessWidget {
           const SizedBox(height: 16),
           Reveal(
             delayMs: 360,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'lib/images/techable_testing.jpeg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 200,
-              ),
+            child: AspectRatio(
+              aspectRatio: 16 / 10,
+              child: const MediaCarousel(items: _carouselItems),
             ),
           ),
           const SizedBox(height: 6),
           const Text(
-            'Tech Analyst · Kwek Bin · TechAble · Navigation testing',
-            style: TextStyle(fontSize: 10, color: Colors.white38),
-          ),
-          const SizedBox(height: 14),
-          Reveal(
-            delayMs: 440,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'lib/images/belt_testing.jpeg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 200,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Asst Director · Joice · AWWA · Viewing exhibition prototype',
+            'In-house testing',
             style: TextStyle(fontSize: 10, color: Colors.white38),
           ),
         ],
@@ -200,71 +184,24 @@ class PrototypeSlide extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        // Photo strip with individual captions
+                        // In-house testing carousel (video + photos)
                         Expanded(
                           flex: 4,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: Reveal(
-                                        delayMs: 360,
-                                        child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          child: Image.asset(
-                                            'lib/images/techable_testing.jpeg',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Reveal(
-                                        delayMs: 440,
-                                        child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          child: Image.asset(
-                                            'lib/images/belt_testing.jpeg',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      ),
-                                    ),
-                                  ],
+                                child: Reveal(
+                                  delayMs: 360,
+                                  child: const MediaCarousel(
+                                      items: _carouselItems),
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              // Per-photo captions with matching flex ratios
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: const Text(
-                                      'Tech Analyst · Kwek Bin · TechAble · Navigation testing',
-                                      style: TextStyle(fontSize: 10, color: Colors.white38),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    flex: 2,
-                                    child: const Text(
-                                      'Asst Director · Joice · AWWA · Viewing exhibition prototype',
-                                      style: TextStyle(fontSize: 10, color: Colors.white38),
-                                    ),
-                                  ),
-                                ],
+                              const Text(
+                                'In-house testing',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.white38),
                               ),
                             ],
                           ),
