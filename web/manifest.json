@@ -1,11 +1,11 @@
 {
-    "name": "pitch_deck",
-    "short_name": "pitch_deck",
+    "name": "AllWays — Indoor Navigation for the Visually Impaired",
+    "short_name": "AllWays",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "Indoor navigation that guides visually impaired users through touch — UWB positioning paired with directional haptic feedback.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
