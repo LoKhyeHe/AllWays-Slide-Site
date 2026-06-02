@@ -24,7 +24,7 @@ class PitchDeckApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Pitch Deck',
+      title: 'AllWays — Indoor Navigation for the Visually Impaired',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
@@ -286,34 +286,20 @@ class _NavBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 28),
       child: Row(
         children: [
-          // Brand — scrolls to top
+          // Brand — logo in a white pill, scrolls to top
           InkWell(
             onTap: () => onNavigate(0),
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'AllWays',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5C842),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.asset(
+                'lib/images/Logo/allways_nav.png',
+                height: 26,
+                fit: BoxFit.contain,
               ),
             ),
           ),
