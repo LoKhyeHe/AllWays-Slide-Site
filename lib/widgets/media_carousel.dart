@@ -212,57 +212,12 @@ class _MediaCarouselState extends State<MediaCarousel> {
     );
   }
 
-  Widget _captionBlock(CarouselItem item) {
-    final lines = <Widget>[];
-    void add(Widget w) {
-      if (lines.isNotEmpty) lines.add(const SizedBox(height: 2));
-      lines.add(w);
-    }
-
-    if (item.title.isNotEmpty) {
-      add(Text(
-        item.title,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          height: 1.2,
-        ),
-      ));
-    }
-    if (item.name.isNotEmpty) {
-      add(Text(
-        item.name,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 11, color: Colors.white70),
-      ));
-    }
-    if (item.organisation.isNotEmpty) {
-      add(Text(
-        item.organisation,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-          color: Color(0xFFF5C842),
-        ),
-      ));
-    }
-    if (item.action.isNotEmpty) {
-      add(Text(
-        item.action,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 10, color: Colors.white38),
-      ));
-    }
-    return Column(
-      key: ValueKey(_index),
-      mainAxisSize: MainAxisSize.min,
-      children: lines,
-    );
-  }
+  // All caption fields joined into a single grey line, e.g.
+  // "Tech Analyst · Kwek Bin · TechAble · Testing AllWays Belt Haptic Feedback".
+  String _captionText(CarouselItem item) =>
+      [item.title, item.name, item.organisation, item.action]
+          .where((s) => s.isNotEmpty)
+          .join('   ·   ');
 
   @override
   Widget build(BuildContext context) {
@@ -280,21 +235,27 @@ class _MediaCarouselState extends State<MediaCarousel> {
                 itemCount: _len > 1 ? _basePage * 2 : 1,
                 itemBuilder: (_, i) {
                   final real = i % _len;
+                  final item = widget.items[real];
                   // Distance of this page from the centre (0 = centred).
                   final dist = (_page - i).abs().clamp(0.0, 1.0);
                   // Centre item is largest; neighbours shrink only slightly so
                   // they stay clearly visible.
                   final scale = 1.0 - dist * 0.14;
+                  Widget media = ClipRRect(
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
+                    child: _buildPage(real),
+                  );
+                  // Photos are shown as taller, narrower (portrait) cards so
+                  // they crop to a tighter frame; the video keeps its width.
+                  if (!item.isVideo) {
+                    media = AspectRatio(aspectRatio: 3 / 4, child: media);
+                  }
                   return Center(
                     child: Transform.scale(
                       scale: scale,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(widget.borderRadius),
-                          child: _buildPage(real),
-                        ),
+                        child: media,
                       ),
                     ),
                   );
@@ -344,12 +305,21 @@ class _MediaCarouselState extends State<MediaCarousel> {
             ],
           ),
         ),
-        // Structured per-item caption — fades as the active item changes.
+        // Single grey caption line — fades as the active item changes.
         if (active.hasCaption) ...[
           const SizedBox(height: 8),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            child: _captionBlock(active),
+            child: Text(
+              _captionText(active),
+              key: ValueKey(_index),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white54,
+                height: 1.3,
+              ),
+            ),
           ),
         ],
       ],
