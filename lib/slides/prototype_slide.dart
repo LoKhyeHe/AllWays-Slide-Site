@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/washi_tape.dart';
 import '../widgets/reveal.dart';
 import '../widgets/media_carousel.dart';
 
@@ -18,9 +17,12 @@ class PrototypeSlide extends StatelessWidget {
   ];
 
   static const _carouselItems = [
-    CarouselItem.video('lib/images/sutd_proposal.mp4'),
-    CarouselItem.image('lib/images/techable_testing.jpeg'),
-    CarouselItem.image('lib/images/belt_testing.jpeg'),
+    CarouselItem.video('lib/images/sutd_proposal.mp4',
+        caption: 'SUTD project proposal demo'),
+    CarouselItem.image('lib/images/techable_testing.jpeg',
+        caption: 'User testing at TechAble'),
+    CarouselItem.image('lib/images/belt_testing.jpeg',
+        caption: 'In-house belt testing'),
   ];
 
   @override
@@ -87,14 +89,9 @@ class PrototypeSlide extends StatelessWidget {
           Reveal(
             delayMs: 360,
             child: AspectRatio(
-              aspectRatio: 16 / 10,
+              aspectRatio: 16 / 11,
               child: const MediaCarousel(items: _carouselItems),
             ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'In-house testing',
-            style: TextStyle(fontSize: 10, color: Colors.white38),
           ),
         ],
       ),
@@ -187,23 +184,10 @@ class PrototypeSlide extends StatelessWidget {
                         // In-house testing carousel (video + photos)
                         Expanded(
                           flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Reveal(
-                                  delayMs: 360,
-                                  child: const MediaCarousel(
-                                      items: _carouselItems),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'In-house testing',
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.white38),
-                              ),
-                            ],
+                          child: Reveal(
+                            delayMs: 360,
+                            child:
+                                const MediaCarousel(items: _carouselItems),
                           ),
                         ),
                       ],

@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 /// A single item in the carousel — either an image or a video asset.
+/// [caption] is shown below the media and updates as the active item changes.
 class CarouselItem {
   final String assetPath;
   final bool isVideo;
-  const CarouselItem.image(this.assetPath) : isVideo = false;
-  const CarouselItem.video(this.assetPath) : isVideo = true;
+  final String caption;
+  const CarouselItem.image(this.assetPath, {this.caption = ''})
+      : isVideo = false;
+  const CarouselItem.video(this.assetPath, {this.caption = ''})
+      : isVideo = true;
 }
 
 /// Horizontal swipeable carousel of images/videos with arrows + dots.
@@ -84,7 +88,9 @@ class _MediaCarouselState extends State<MediaCarousel> {
   }
 
   void _go(int delta) {
-    final next = (_index + delta).clamp(0, widget.items.length - 1);
+    // Wrap around so the last item loops back to the first (and vice versa).
+    final len = widget.items.length;
+    final next = (_index + delta + len) % len;
     _pageController.animateToPage(
       next,
       duration: const Duration(milliseconds: 320),
@@ -171,9 +177,13 @@ class _MediaCarouselState extends State<MediaCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
+    final caption = widget.items[_index].caption;
+    return Column(
       children: [
+        Expanded(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
           PageView.builder(
             controller: _pageController,
             onPageChanged: _onPageChanged,
@@ -198,16 +208,16 @@ class _MediaCarouselState extends State<MediaCarousel> {
               );
             },
           ),
-          // Left arrow
-          if (_index > 0)
+          // Left arrow — always shown so it can wrap to the last item.
+          if (widget.items.length > 1)
             Positioned(
               left: 8,
               top: 0,
               bottom: 0,
               child: Center(child: _arrow(Icons.chevron_left, () => _go(-1))),
             ),
-          // Right arrow
-          if (_index < widget.items.length - 1)
+          // Right arrow — always shown so it can wrap to the first item.
+          if (widget.items.length > 1)
             Positioned(
               right: 8,
               top: 0,
@@ -237,7 +247,23 @@ class _MediaCarouselState extends State<MediaCarousel> {
               ],
             ),
           ),
+            ],
+          ),
+        ),
+        // Per-item caption — fades as the active item changes.
+        if (caption.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: Text(
+              caption,
+              key: ValueKey(caption),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11, color: Colors.white54),
+            ),
+          ),
         ],
+      ],
     );
   }
 
