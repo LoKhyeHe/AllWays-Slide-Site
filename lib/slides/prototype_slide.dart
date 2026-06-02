@@ -17,12 +17,27 @@ class PrototypeSlide extends StatelessWidget {
   ];
 
   static const _carouselItems = [
-    CarouselItem.video('lib/images/sutd_proposal.mp4',
-        caption: 'SUTD project proposal demo'),
-    CarouselItem.image('lib/images/techable_testing.jpeg',
-        caption: 'User testing at TechAble'),
-    CarouselItem.image('lib/images/belt_testing.jpeg',
-        caption: 'In-house belt testing'),
+    CarouselItem.video(
+      'lib/images/sutd_proposal.mp4',
+      title: 'Project Proposal Demo',
+      name: 'AllWays Team',
+      organisation: 'SUTD',
+      action: 'Concept pitch & walkthrough',
+    ),
+    CarouselItem.image(
+      'lib/images/techable_testing.jpeg',
+      title: 'User Testing',
+      name: 'VI participants',
+      organisation: 'TechAble',
+      action: 'Belt navigation trial',
+    ),
+    CarouselItem.image(
+      'lib/images/belt_testing.jpeg',
+      title: 'Belt Testing',
+      name: 'AllWays Team',
+      organisation: 'In-house',
+      action: 'Durability & fit check',
+    ),
   ];
 
   @override
@@ -89,7 +104,7 @@ class PrototypeSlide extends StatelessWidget {
           Reveal(
             delayMs: 360,
             child: AspectRatio(
-              aspectRatio: 16 / 11,
+              aspectRatio: 16 / 13,
               child: const MediaCarousel(items: _carouselItems),
             ),
           ),

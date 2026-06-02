@@ -2,20 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 /// A single item in the carousel — either an image or a video asset.
-/// [caption] is shown below the media and updates as the active item changes.
+/// The caption is split into four optional lines shown below the media:
+/// [title], [name], [organisation] and [action]. They update (with a fade)
+/// as the active item changes.
 class CarouselItem {
   final String assetPath;
   final bool isVideo;
-  final String caption;
-  const CarouselItem.image(this.assetPath, {this.caption = ''})
-      : isVideo = false;
-  const CarouselItem.video(this.assetPath, {this.caption = ''})
-      : isVideo = true;
+  final String title;
+  final String name;
+  final String organisation;
+  final String action;
+  const CarouselItem.image(
+    this.assetPath, {
+    this.title = '',
+    this.name = '',
+    this.organisation = '',
+    this.action = '',
+  }) : isVideo = false;
+  const CarouselItem.video(
+    this.assetPath, {
+    this.title = '',
+    this.name = '',
+    this.organisation = '',
+    this.action = '',
+  }) : isVideo = true;
+
+  bool get hasCaption =>
+      title.isNotEmpty ||
+      name.isNotEmpty ||
+      organisation.isNotEmpty ||
+      action.isNotEmpty;
 }
 
 /// Horizontal swipeable carousel of images/videos with arrows + dots.
-/// The video auto-plays (muted, looping) when it is the active page and
-/// pauses when the user switches away.
+/// Scrolls infinitely in both directions (the last item flows straight into
+/// the first, with no snap-back). The video auto-plays (muted, looping) when
+/// it is the active page and pauses when the user switches away.
 class MediaCarousel extends StatefulWidget {
   final List<CarouselItem> items;
   final double borderRadius;
@@ -31,24 +53,38 @@ class MediaCarousel extends StatefulWidget {
 
 class _MediaCarouselState extends State<MediaCarousel> {
   late final PageController _pageController;
+  // Active item index in 0..items.length-1 (used for dots, caption, video).
   int _index = 0;
-  double _page = 0;
+  // Current absolute page position (may be far from 0 due to infinite paging).
+  late double _page;
+
+  // A large starting page so the user can scroll far in either direction
+  // before hitting the (practically unreachable) ends. Kept as a multiple of
+  // items.length so the initial real index is 0.
+  late final int _basePage;
 
   // One controller per video item, keyed by item index.
   final Map<int, VideoPlayerController> _videos = {};
   // Error message per video item, if initialization failed.
   final Map<int, String> _videoErrors = {};
 
+  int get _len => widget.items.length;
+
   @override
   void initState() {
     super.initState();
-    // viewportFraction < 1 so the previous/next items peek on each side.
-    _pageController = PageController(viewportFraction: 0.74)
-      ..addListener(() {
+    _basePage = _len * 1000;
+    _page = _basePage.toDouble();
+    // viewportFraction well below 1 so the centre item is narrower and the
+    // neighbouring media stay clearly visible on both sides.
+    _pageController = PageController(
+      viewportFraction: 0.6,
+      initialPage: _basePage,
+    )..addListener(() {
         final p = _pageController.page;
         if (p != null) setState(() => _page = p);
       });
-    for (var i = 0; i < widget.items.length; i++) {
+    for (var i = 0; i < _len; i++) {
       final item = widget.items[i];
       if (item.isVideo) {
         final c = VideoPlayerController.asset(item.assetPath);
@@ -76,10 +112,11 @@ class _MediaCarouselState extends State<MediaCarousel> {
     super.dispose();
   }
 
-  void _onPageChanged(int i) {
-    setState(() => _index = i);
+  void _onPageChanged(int absolutePage) {
+    final real = absolutePage % _len;
+    setState(() => _index = real);
     _videos.forEach((idx, c) {
-      if (idx == i) {
+      if (idx == real) {
         c.play();
       } else {
         c.pause();
@@ -88,11 +125,11 @@ class _MediaCarouselState extends State<MediaCarousel> {
   }
 
   void _go(int delta) {
-    // Wrap around so the last item loops back to the first (and vice versa).
-    final len = widget.items.length;
-    final next = (_index + delta + len) % len;
+    // Move relative to the current absolute page so the loop is seamless —
+    // going right past the last item flows straight into the first.
+    final cur = (_pageController.page ?? _basePage.toDouble()).round();
     _pageController.animateToPage(
-      next,
+      cur + delta,
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeInOut,
     );
@@ -175,92 +212,144 @@ class _MediaCarouselState extends State<MediaCarousel> {
     );
   }
 
+  Widget _captionBlock(CarouselItem item) {
+    final lines = <Widget>[];
+    void add(Widget w) {
+      if (lines.isNotEmpty) lines.add(const SizedBox(height: 2));
+      lines.add(w);
+    }
+
+    if (item.title.isNotEmpty) {
+      add(Text(
+        item.title,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          height: 1.2,
+        ),
+      ));
+    }
+    if (item.name.isNotEmpty) {
+      add(Text(
+        item.name,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 11, color: Colors.white70),
+      ));
+    }
+    if (item.organisation.isNotEmpty) {
+      add(Text(
+        item.organisation,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+          color: Color(0xFFF5C842),
+        ),
+      ));
+    }
+    if (item.action.isNotEmpty) {
+      add(Text(
+        item.action,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 10, color: Colors.white38),
+      ));
+    }
+    return Column(
+      key: ValueKey(_index),
+      mainAxisSize: MainAxisSize.min,
+      children: lines,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final caption = widget.items[_index].caption;
+    final active = widget.items[_index];
     return Column(
       children: [
         Expanded(
           child: Stack(
             fit: StackFit.expand,
             children: [
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
-            itemCount: widget.items.length,
-            itemBuilder: (_, i) {
-              // Distance of this page from the centre (0 = centred).
-              final dist = (_page - i).abs().clamp(0.0, 1.0);
-              // Centre item is full-size; neighbours shrink and recede.
-              final scale = 1.0 - dist * 0.22;
-              return Center(
-                child: Transform.scale(
-                  scale: scale,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(widget.borderRadius),
-                      child: _buildPage(i),
+              PageView.builder(
+                controller: _pageController,
+                onPageChanged: _onPageChanged,
+                // Effectively infinite: a huge count centred on _basePage.
+                itemCount: _len > 1 ? _basePage * 2 : 1,
+                itemBuilder: (_, i) {
+                  final real = i % _len;
+                  // Distance of this page from the centre (0 = centred).
+                  final dist = (_page - i).abs().clamp(0.0, 1.0);
+                  // Centre item is largest; neighbours shrink only slightly so
+                  // they stay clearly visible.
+                  final scale = 1.0 - dist * 0.14;
+                  return Center(
+                    child: Transform.scale(
+                      scale: scale,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(widget.borderRadius),
+                          child: _buildPage(real),
+                        ),
+                      ),
                     ),
-                  ),
+                  );
+                },
+              ),
+              // Left arrow
+              if (_len > 1)
+                Positioned(
+                  left: 8,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                      child: _arrow(Icons.chevron_left, () => _go(-1))),
                 ),
-              );
-            },
-          ),
-          // Left arrow — always shown so it can wrap to the last item.
-          if (widget.items.length > 1)
-            Positioned(
-              left: 8,
-              top: 0,
-              bottom: 0,
-              child: Center(child: _arrow(Icons.chevron_left, () => _go(-1))),
-            ),
-          // Right arrow — always shown so it can wrap to the first item.
-          if (widget.items.length > 1)
-            Positioned(
-              right: 8,
-              top: 0,
-              bottom: 0,
-              child: Center(child: _arrow(Icons.chevron_right, () => _go(1))),
-            ),
-          // Dots
-          Positioned(
-            bottom: 10,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (int i = 0; i < widget.items.length; i++)
-                  Container(
-                    width: 7,
-                    height: 7,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i == _index
-                          ? const Color(0xFFF5C842)
-                          : Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+              // Right arrow
+              if (_len > 1)
+                Positioned(
+                  right: 8,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                      child: _arrow(Icons.chevron_right, () => _go(1))),
+                ),
+              // Dots
+              Positioned(
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (int i = 0; i < _len; i++)
+                      Container(
+                        width: 7,
+                        height: 7,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i == _index
+                              ? const Color(0xFFF5C842)
+                              : Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        // Per-item caption — fades as the active item changes.
-        if (caption.isNotEmpty) ...[
-          const SizedBox(height: 6),
+        // Structured per-item caption — fades as the active item changes.
+        if (active.hasCaption) ...[
+          const SizedBox(height: 8),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            child: Text(
-              caption,
-              key: ValueKey(caption),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, color: Colors.white54),
-            ),
+            child: _captionBlock(active),
           ),
         ],
       ],
